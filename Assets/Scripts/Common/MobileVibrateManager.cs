@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using HexaBlast.Plugin;
 
+
 namespace HexaBlast.Common
 {
     public class MobileVibrateManager
@@ -12,7 +13,7 @@ namespace HexaBlast.Common
 #if UNITY_ANDROID
             MatchMatchAndroidPlugin.Vibrate((long)(time * 1000));
 #elif UNITY_IOS
-
+            MatchMatchIOSPlugin.Vibrate((long)(time * 1000));
 #endif
         }
     }
