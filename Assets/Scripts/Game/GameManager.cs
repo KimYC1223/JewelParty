@@ -1,20 +1,29 @@
-using HexaBlast.Common;
-using HexaBlast.UI;
-using HexaBlast.Common.VO;
+using MatchMatch.Common;
+using MatchMatch.UI;
+using MatchMatch.Common.VO;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace HexaBlast.Game
+namespace MatchMatch.Game
 {
+    //===============================================================================================================================================
+    //  게임 전체를 관장하는 토탈 메니저
+    //===============================================================================================================================================
     public class GameManager : MonoBehaviour
     {
-        public static bool IsInteractable = true;
-        public static LevelInfo CurrentLevelInfo;
+        #region FIELD
+        public static bool IsInteractable = true;           // 현재 블럭의 조작이 가능한지 저장하는 변수
+        public static LevelInfo CurrentLevelInfo;           // 현재 플레이중인 레벨의 정보
 
-        private NetworkManager networkManager;
-        private CandyMatcher   candyMatcher;
+        private NetworkManager networkManager;              // 네트워크 매니저
+        private BlockMatcher   blockMatcher;                // 블록 매칭 알고리즘 담당하는 클래스
+        #endregion
 
+        #region INSTANCE
+        //===========================================================================================================================================
+        //  타일 매니저 인스턴스
+        //===========================================================================================================================================
         private static TileManager _TileManagerInstance;
         public static TileManager TileManagerInstance
         {
@@ -30,21 +39,27 @@ namespace HexaBlast.Game
             private set { }
         }
 
-        private static CandyManager _CandyManagerInstance;
-        public static CandyManager CandyManagerInstance
+        //===========================================================================================================================================
+        //  블록 매니저 인스턴스
+        //===========================================================================================================================================
+        private static BlockManager _BlockManagerInstance;
+        public static BlockManager BlockManagerInstance
         {
             get
             {
-                if ( _CandyManagerInstance == null )
+                if ( _BlockManagerInstance == null )
                 {
-                    _CandyManagerInstance = GameObject.Find("Candy Manager Object").GetComponent<CandyManager>();
+                    _BlockManagerInstance = GameObject.Find("Block Manager Object").GetComponent<BlockManager>();
                 }
-                return _CandyManagerInstance;
+                return _BlockManagerInstance;
             }
 
             private set { }
         }
 
+        //===========================================================================================================================================
+        //  UI Size 핸들러 인스턴스
+        //===========================================================================================================================================
         private static UISizeHandler _UISizeHandlerInstance;
         public static UISizeHandler UISizeHandlerInstance
         {
@@ -60,6 +75,9 @@ namespace HexaBlast.Game
             private set { }
         }
 
+        //===========================================================================================================================================
+        //  사운드 매니저 인스턴스
+        //===========================================================================================================================================
         private static SoundManager _SoundManagerInstance;
         public static SoundManager SoundManagerInstance
         {
@@ -75,6 +93,9 @@ namespace HexaBlast.Game
             private set { }
         }
 
+        //===========================================================================================================================================
+        //  게임 매니저 인스턴스
+        //===========================================================================================================================================
         private static GameManager _Instance;
         public static GameManager Instance
         {
@@ -89,28 +110,23 @@ namespace HexaBlast.Game
 
             private set { }
         }
+        #endregion
 
-        private void Start()
-        {
-            networkManager = new NetworkManager();
-            candyMatcher   = new CandyMatcher();
-
-            StartCoroutine(networkManager.LoadGameLevel("Data_Server_IP", (levelInfo) => {
-                CurrentLevelInfo = levelInfo;
-                TileManagerInstance.SetTileArray();
-                CandyManagerInstance.SetCandyInfo();
-                Debug.Log("HexaBlast::GameManager::Start::Load game level complete.");
-
-                HeaderUIHandler.Instance.SetGoalValue(CurrentLevelInfo.Goal);
-                HeaderUIHandler.Instance.SetMoveValue(CurrentLevelInfo.InitMove);
-                HeaderUIHandler.Instance.SetStarThreshold(CurrentLevelInfo.StarThreshold);
-            }));
-
-            MobileVibrateManager.Vibrate(1f);
-        }
-
+        #region PUBLIC_METHOD
+        //===========================================================================================================================================
+        //
+        //  주어진 타일들에 대해서, 타일 매칭 진행 ( List<Tile>로 전달 )
+        //
+        //===========================================================================================================================================
+        /// <summary>
+        /// 주어진 타일들에 대해서, 타일 매칭 진행하는 메서드.<br />
+        /// 지워지는 타일과 떨어지는 타일들의 개수를 <see cref="DeleteInfo"/> VO를 통해 리턴.<br />
+        /// </summary>
+        /// <param name="tileList">매칭을 진행할 타일 List</param>
+        /// <returns>지워지는 타일과 떨어지는 타일들의 개수</returns>
         public DeleteInfo CalculateGameStatus(List<Tile> tileList)
         {
+            // List를 Array로 변환 후 넘겨줌
             Tile[] tiles = new Tile[tileList.Count];
             for(int i = 0 ; i < tileList.Count ; i++ )
             {
@@ -119,28 +135,96 @@ namespace HexaBlast.Game
             return CalculateGameStatus(tiles);
         }
 
+        //===========================================================================================================================================
+        //
+        //  주어진 타일들에 대해서, 타일 매칭 진행 ( Tile[]로 전달 )
+        //
+        //===========================================================================================================================================
+        /// <summary>
+        /// 주어진 타일들에 대해서, 타일 매칭 진행하는 메서드.<br />
+        /// 지워지는 타일과 떨어지는 타일들의 개수를 <see cref="DeleteInfo"/> VO를 통해 리턴.<br />
+        /// </summary>
+        /// <param name="tiles">매칭을 진행할 타일 Array</param>
+        /// <returns>지워지는 타일과 떨어지는 타일들의 개수</returns>
         public DeleteInfo CalculateGameStatus(Tile[] tiles)
         {
-            return candyMatcher.CalculateGameStatus(tiles);
+            return blockMatcher.RunBlockMatch(tiles);
         }
 
-        public void DelaySecond(float seconds, HexaBlastDelegate.VoidDelegate callback)
+        //===========================================================================================================================================
+        //
+        //  일정 시간 후 임의의 콜백을 실행시키는 메서드.
+        //
+        //===========================================================================================================================================
+        /// <summary>
+        /// 일정 시간 후 임의의 콜백을 실행시키는 메서드.
+        /// </summary>
+        /// <param name="seconds">대기 시간. ( 단위 :Sec )</param>
+        /// <param name="callback">실행시킬 콜백</param>
+        public void DelaySecond(float seconds, MatchMatchDelegate.VoidDelegate callback)
         {
             StartCoroutine(DelaySecondCoroutine(seconds, callback));
         }
 
-        private IEnumerator DelaySecondCoroutine (float seconds, HexaBlastDelegate.VoidDelegate callback)
+        //===========================================================================================================================================
+        //
+        //  게임이 종료되었는지 판단하는 메서드
+        //
+        //===========================================================================================================================================
+        /// <summary>
+        /// 게임이 종료되었는지 판단하는 메서드.
+        /// </summary>
+        /// <returns>게임 종료 여부</returns>
+        public bool IsGameEnd()
         {
+            return ( HeaderUIHandler.Instance.Goal == 0 );
+        }
+        #endregion
+
+        #region PRIVATE_METHOD
+        //===========================================================================================================================================
+        //
+        //  게임이 로드 될 때 실행하는 메서드
+        //
+        //===========================================================================================================================================
+        private void Start()
+        {
+            // Private 인스턴스 생성
+            networkManager = new NetworkManager();
+            blockMatcher = new BlockMatcher();
+
+            //=======================================================================================================================================
+            // 게임 정보 로드
+            //=======================================================================================================================================
+            StartCoroutine(networkManager.LoadGameLevel("Data_Server_IP", (levelInfo) => {
+                // 받아온 정보를 통해 각종 어레이 추가
+                CurrentLevelInfo = levelInfo;
+                TileManagerInstance.SetTileArray();
+                BlockManagerInstance.SetBlockInfo();
+                Debug.Log("MatchMatch::GameManager::Start::Load game level complete.");
+
+                HeaderUIHandler.Instance.SetGoalValue(10);
+                HeaderUIHandler.Instance.SetMoveValue(CurrentLevelInfo.InitMove);
+                HeaderUIHandler.Instance.SetStarThreshold(CurrentLevelInfo.StarThreshold);
+            }));
+        }
+        #endregion
+
+        #region PRIVATE_ENUMERATOR
+        //===========================================================================================================================================
+        //
+        //  일정 시간 대기하는 Enumerator
+        //
+        //===========================================================================================================================================
+        private IEnumerator DelaySecondCoroutine (float seconds, MatchMatchDelegate.VoidDelegate callback)
+        {
+            // 일정 시간 대기 후, 정해진 callback 실행
             yield return new WaitForSeconds(seconds);
             if(callback != null)
             {
                 callback();
             }
         }
-
-        public bool IsGameEnd()
-        {
-           return ( HeaderUIHandler.Instance.Goal == 0 );
-        }
+        #endregion
     }
 }

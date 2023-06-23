@@ -1,17 +1,27 @@
-using HexaBlast.UI.POPUP;
-using System.Collections;
-using System.Collections.Generic;
+using MatchMatch.UI.POPUP;
 using UnityEngine;
 
-namespace HexaBlast.UI
+namespace MatchMatch.UI
 {
+    //===============================================================================================================================================
+    //  메뉴 버튼 핸들러
+    //===============================================================================================================================================
     public class MenuButtonHandler : MonoBehaviour
     {
-        // Start is called before the first frame update
+        #region PUBLIC_METHOD
+        //===========================================================================================================================================
+        //
+        //  메뉴 버튼을 눌렀을 때, 동작하는 메서드
+        //
+        //===========================================================================================================================================
+        /// <summary>
+        /// 메뉴 버튼을 눌렀을 때, 동작하는 메서드
+        /// </summary>
         public void OpenMenu()
         {
-            Debug.Log(PopUpManager.Instance.WindowsDict["Menu"] == null);
+            // 팝업 매니저를 통해 메뉴 팝업 띄우기
             PopUpManager.Instance.WindowsDict["Menu"].gameObject.SetActive(true);
         }
+        #endregion
     }
 }

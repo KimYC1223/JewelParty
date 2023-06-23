@@ -1,11 +1,15 @@
-using HexaBlast.Common.VO;
+using MatchMatch.Common.VO;
 
-namespace HexaBlast.Common
+namespace MatchMatch.Common
 {
-     public class HexaBlastDelegate
+    //===============================================================================================================================================
+    //  게임에서 사용되는 Delegate 모음
+    //===============================================================================================================================================
+    public class MatchMatchDelegate
     {
-        public delegate void VoidDelegate();
-        public delegate void LevelInfoDelegate(LevelInfo levelInfo);
-        public delegate void GenericDelegate<T>(T t);
+        #region DELEGATE
+        public delegate void VoidDelegate();                // 아무것도 없는 델리게이트 
+        public delegate void GenericDelegate<T>(T t);       // 타입 T에 대한 델리게이트
+        #endregion
     }
 }

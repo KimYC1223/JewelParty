@@ -1,11 +1,14 @@
-﻿using System;
+using System;
 
-namespace HexaBlast.Common.VO
+namespace MatchMatch.Common.VO
 {
+    //===============================================================================================================================================
+    //  MatchMatch에서 사용하는 Delegate 정의
+    //===============================================================================================================================================
     [Serializable]
     public class DeleteInfo
     { 
-        public int DeletedTileNum;
-        public int FalledTileNum;
+        public int DeletedTileNum;  // 매칭 결과, 터지게 되는 블럭의 수
+        public int FalledTileNum;   // 매칭 결과, 블럭을 터트린 후 중력의 영향을 받아 떨어지는 블럭의 수
     }
 }

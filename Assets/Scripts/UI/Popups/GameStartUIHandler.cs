@@ -1,24 +1,43 @@
 using UnityEngine;
-using HexaBlast.Common;
-using HexaBlast.Game;
+using MatchMatch.Common;
+using MatchMatch.Game;
 using System.Collections;
 
-namespace HexaBlast.UI.POPUP
+namespace MatchMatch.UI.POPUP
 {
+    //===============================================================================================================================================
+    //  게임 스타트 UI를 제어하는 핸들러
+    //===============================================================================================================================================
     public class GameStartUIHandler : PopUpWindows
     {
-        public Animator ShowAnimator;
+        #region FIELD
+        public Animator ShowAnimator;           // 쇼 애니메이터
+        #endregion
 
+        #region PUBLIC_METHOD
+        //===========================================================================================================================================
+        //  사운드를 재생하는 메서드 (애니메이터에서 사용)
+        //===========================================================================================================================================
+        /// <summary>
+        /// 사운드를 재생하는 메서드.
+        /// </summary>
         public void SoundPlay()
         {
             GameManager.SoundManagerInstance.PlayBackgroundMusic(BGM.GAME);
             GameManager.SoundManagerInstance.PlaySound(SFX.READY_GO);
         }
 
+        //===========================================================================================================================================
+        //  애니메이터가 종료 된 후 실행되는 메서드 (애니메이터에서 사용)
+        //===========================================================================================================================================
+        /// <summary>
+        /// 애니메이터가 종료 된 후 실행되는 메서드.
+        /// </summary>
         public void AnimationEndStep()
         {
-            GameManager.IsInteractable = true;
-            CloseWinodw();
+            GameManager.IsInteractable = true;      // 타일 및 블럭 조작 가능하도록 설정
+            CloseWinodw();                          // 윈도우 닫기
         }
+        #endregion
     }
 }

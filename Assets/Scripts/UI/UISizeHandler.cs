@@ -1,67 +1,80 @@
 using System.Collections;
 using UnityEngine;
 
-namespace HexaBlast.UI {
-    //==========================================================================================================
-    //  UI ¿ÀºêÁ§Æ®ÀÇ Å©±â¸¦ ScreenÀÇ Å©±â¿¡ ¸Â°Ô ¼³Á¤
-    //==========================================================================================================
+namespace MatchMatch.UI {
+    //===============================================================================================================================================
+    //  UI ì˜¤ë¸Œì íŠ¸ì˜ í¬ê¸°ë¥¼ Screenì˜ í¬ê¸°ì— ë§ê²Œ ì„¤ì •
+    //===============================================================================================================================================
     public class UISizeHandler : MonoBehaviour 
     {
-        public RectTransform Tiles;                     // º¯°æÇÒ RectTransform
-        public RectTransform ScoreLayout;               // º¯°æÇÒ RectTransform
-        public RectTransform MainLayout;                // º¯°æÇÒ RectTransform
-        public Vector2 ScreenSize = Vector2.zero;       // ½ºÅ©¸° »çÀÌÁî
+        #region FIELD
+        public RectTransform Tiles;                     // ë³€ê²½í•  RectTransform
+        public RectTransform ScoreLayout;               // ë³€ê²½í•  RectTransform
+        public RectTransform MainLayout;                // ë³€ê²½í•  RectTransform
+        public Vector2 ScreenSize = Vector2.zero;       // ìŠ¤í¬ë¦° ì‚¬ì´ì¦ˆ
+        public static UISizeHandler Instance;           // ì¸ìŠ¤í„´ìŠ¤
+        #endregion
 
-        public static UISizeHandler Instance;
-
-        public void Awake()
-        {
-            Instance = this;
-        }
-
-        public void Update() 
+        #region PRIVATE_METHOD
+        //===========================================================================================================================================
+        //
+        //  Update í”„ë ˆì„ë§ˆë‹¤ ì‹¤í–‰ë˜ëŠ” ë©”ì„œë“œ
+        //
+        //===========================================================================================================================================
+        private void Update() 
         {
 #if UNITY_EDITOR
-            // EditorÀÇ °æ¿ì, Ä«¸Ş¶óÀÇ pixelWidth¸¦ °¡Á®¿È
+            // Editorì˜ ê²½ìš°, ì¹´ë©”ë¼ì˜ pixelWidthë¥¼ ê°€ì ¸ì˜´
             ScreenSize.x = Camera.main.pixelWidth;
             ScreenSize.y = Camera.main.pixelHeight;
 #else
-            // µğ¹ÙÀÌ½ºÀÏ °æ¿ì, ScreenÀÇ width¸¦ °¡Á®¿È
+            // ë””ë°”ì´ìŠ¤ì¼ ê²½ìš°, Screenì˜ widthë¥¼ ê°€ì ¸ì˜´
             ScreenSize.x  = Screen.width;
             ScreenSize.y = Screen.height;
 #endif
-            //==================================================================================================
-            //  Score Layout Å©±â Á¶Àı
-            //==================================================================================================
-            // ÇöÀç Tile RootÀÇ °¡·Î »çÀÌÁî
+            //=======================================================================================================================================
+            //  Score Layout í¬ê¸° ì¡°ì ˆ
+            //=======================================================================================================================================
+            // í˜„ì¬ Tile Rootì˜ ê°€ë¡œ ì‚¬ì´ì¦ˆ
             float scoreLayoutHeight = ScreenSize.x * 0.35f;
 
-            // ½ºÅ©¸° »çÀÌÁîÀÇ 35%, 400px Áß ´õ ÀÛÀº °ªÀ¸·Î ¼³Á¤
+            // ìŠ¤í¬ë¦° ì‚¬ì´ì¦ˆì˜ 35%, 400px ì¤‘ ë” ì‘ì€ ê°’ìœ¼ë¡œ ì„¤ì •
             float newScoreLayoutheight = scoreLayoutHeight < 250f ? scoreLayoutHeight : 250f;
             ScoreLayout.sizeDelta = new Vector2(0, newScoreLayoutheight);
 
-            //==================================================================================================
-            //  Main Layout Å©±â Á¶Àı
-            //==================================================================================================
-            // À§¿¡¼­ ±¸ÇÑ scoreLayoutHeight ¸¸Å­ ¶ç¿ì±â
+            //=======================================================================================================================================
+            //  Main Layout í¬ê¸° ì¡°ì ˆ
+            //=======================================================================================================================================
+            // ìœ„ì—ì„œ êµ¬í•œ scoreLayoutHeight ë§Œí¼ ë„ìš°ê¸°
             MainLayout.offsetMin = new Vector2(0, 200f);
             MainLayout.offsetMax = new Vector2(0, -newScoreLayoutheight -25f);
 
-            //==================================================================================================
-            //  Tiles Å©±â Á¶Àı
-            //==================================================================================================
-            // ÇöÀç Tile RootÀÇ °¡·Î/¼¼·Î »çÀÌÁî, mainLayout ¼¼·Î »çÀÌÁî
+            //=======================================================================================================================================
+            //  Tiles í¬ê¸° ì¡°ì ˆ
+            //=======================================================================================================================================
+            // í˜„ì¬ Tile Rootì˜ ê°€ë¡œ/ì„¸ë¡œ ì‚¬ì´ì¦ˆ, mainLayout ì„¸ë¡œ ì‚¬ì´ì¦ˆ
             float gameFieldWidth   = Tiles.sizeDelta.x;
             float gameFieldHeight  = Tiles.sizeDelta.y;
             float mainLayoutHeight = ScreenSize.y - 225f -newScoreLayoutheight;
 
-            // °¡·Î/¼¼·Î »çÀÌÁîÁß ´õ ÀÛÀº°É °í¸£±â
+            // ê°€ë¡œ/ì„¸ë¡œ ì‚¬ì´ì¦ˆì¤‘ ë” ì‘ì€ê±¸ ê³ ë¥´ê¸°
             float gameFieldSize   = ( ScreenSize.x < mainLayoutHeight ) ? gameFieldWidth : gameFieldHeight;
             float layoutSize      = ( ScreenSize.x < mainLayoutHeight ) ? ScreenSize.x : mainLayoutHeight;
 
-            // Layout »çÀÌÁîÀÇ 90%¸¸Å­ Â÷ÁöÇÏµµ·Ï º¯°æ (Scale Á¶Á¤)
+            // Layout ì‚¬ì´ì¦ˆì˜ 90%ë§Œí¼ ì°¨ì§€í•˜ë„ë¡ ë³€ê²½ (Scale ì¡°ì •)
             float ScaleFactor = ( layoutSize * 0.9f ) / gameFieldSize;
             Tiles.localScale = new Vector3(ScaleFactor, ScaleFactor, ScaleFactor);
         }
+
+        //===========================================================================================================================================
+        //
+        //  Awake ë¼ì´í”„ì‚¬ì´í´ì— ì‹¤í–‰ë˜ëŠ” ë©”ì„œë“œ
+        //
+        //===========================================================================================================================================
+        public void Awake()
+        {
+            Instance = this;                // ì¸ìŠ¤í„´ìŠ¤ ë³€ìˆ˜ ì„¤ì •
+        }
+        #endregion
     }
 }
